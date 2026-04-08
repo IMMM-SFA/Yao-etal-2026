@@ -5,121 +5,112 @@ clear all; clc
 regions = {'NW','SW','NGP','SGP','MW','SE','NE','CONUS'};
 scenarios = {'SSP345-L','SSP345-H','SSP585-L','SSP585-H'};
 
-% Define delta T data for each season and annual
+% Define custom colors: light blue, dark blue, light red, dark red
+colors = [
+    0.70, 0.85, 1.00;  % SSP345-L
+    0.00, 0.30, 0.80;  % SSP345-H
+    1.00, 0.75, 0.75;  % SSP585-L
+    0.75, 0.00, 0.00   % SSP585-H
+];
+
+% Define delta precipitation data (%)
 annual = [
-    1.61 2.10 1.78 2.51;
-    1.55 2.07 1.76 2.44;
-    1.73 2.40 2.03 2.87;
-    1.46 1.94 1.68 2.30;
-    1.74 2.46 2.07 2.94;
-    1.38 1.82 1.59 2.20;
-    1.50 2.16 1.79 2.59;
-    1.58 2.14 1.82 2.55];
+    2.4 4.5 1.8 5.5;
+   -0.1 -0.7 -0.8 -1.1;
+    4.3 6.9 2.6 5.4;
+    2.6 0.0 1.9 1.3;
+   -0.1 -3.2 -2.8 -4.8;
+    1.1 -2.1 -1.2 -2.3;
+    6.6 4.8 5.5 8.4;
+    2.0 0.5 0.3 0.5];
 
 djf = [
-    1.51 1.86 1.71 2.28;
-    1.44 1.82 1.67 2.31;
-    1.86 2.19 2.18 2.71;
-    1.40 1.61 1.65 2.20;
-    2.05 2.50 2.47 3.18;
-    1.24 1.49 1.54 2.04;
-    1.57 2.24 2.09 2.91;
-    1.59 1.95 1.89 2.50];
+    1.13 5.39 1.38 7.29;
+    2.40 6.54 2.46 9.33;
+    4.85 8.53 4.89 10.17;
+    9.16 13.04 9.89 16.78;
+    2.47 1.55 0.61 3.87;
+    3.91 2.39 1.30 1.94;
+    2.64 -1.42 2.09 2.80;
+    3.44 4.42 2.52 6.26];
 
 mam = [
-    1.48 1.82 1.52 2.10;
-    1.46 1.83 1.55 2.12;
-    1.58 2.11 1.83 2.47;
-    1.31 1.65 1.48 1.87;
-    1.54 2.05 1.82 2.38;
-    1.28 1.57 1.42 1.82;
-    1.43 1.89 1.62 2.24;
-    1.44 1.85 1.61 2.15];
+    2.48 2.97 -0.16 2.84;
+    1.37 1.78 -0.89 2.95;
+    7.62 5.84 4.00 6.56;
+    3.66 3.39 4.32 7.59;
+    3.36 -0.68 1.51 -0.51;
+    0.54 -3.56 -0.54 -3.09;
+    6.95 4.10 5.84 3.98;
+    3.43 1.11 1.78 1.94];
 
 jja = [
-    1.75 2.47 2.04 2.97;
-    1.60 2.28 1.88 2.60;
-    1.79 2.66 2.10 3.19;
-    1.59 2.12 1.84 2.43;
-    1.79 2.56 2.06 3.06;
-    1.53 2.01 1.74 2.39;
-    1.58 2.17 1.75 2.52;
-    1.66 2.33 1.92 2.75];
+    1.58 6.36 2.33 7.01;
+   -10.27 -17.14 -10.92 -23.26;
+   -3.88 6.90 -5.70 -0.25;
+   -8.69 -14.91 -10.18 -18.75;
+   -8.03 -11.58 -12.58 -16.00;
+   -2.51 -5.95 -5.30 -7.80;
+    9.11 6.57 8.13 13.73;
+   -3.43 -5.46 -5.81 -7.74];
 
 son = [
-    1.73 2.26 1.86 2.71;
-    1.72 2.38 1.97 2.75;
-    1.71 2.63 2.00 3.12;
-    1.55 2.37 1.77 2.69;
-    1.59 2.75 1.92 3.15;
-    1.46 2.20 1.66 2.55;
-    1.43 2.35 1.73 2.72;
-    1.61 2.44 1.86 2.83];
+    4.88 4.11 4.42 5.24;
+    3.30 -0.69 3.10 -2.72;
+    8.06 7.45 8.31 6.31;
+    6.58 -0.75 3.85 -0.52;
+    2.97 -0.10 0.71 -3.90;
+    3.72 -0.18 0.81 1.17;
+    6.68 9.15 4.91 12.07;
+    4.78 2.01 3.00 1.82];
 
-
-
-% Combine all into a cell array
-% Combine all into a cell array
+% Combine into cell array
 seasonal_data = {annual, djf, mam, jja, son};
 season_names = {'Annual','DJF','MAM','JJA','SON'};
 
-% Set up figure
+% Create figure
 figure('Position', [100, 100, 1200, 900])
 t = tiledlayout(3,2, 'TileSpacing', 'compact', 'Padding', 'compact');
 
-% Set colors
-colors = [
-    0.70, 0.85, 1.00;  % SSP345-L (light blue)
-    0.00, 0.30, 0.80;  % SSP345-H (dark blue)
-    1.00, 0.75, 0.75;  % SSP585-L (light red)
-    0.75, 0.00, 0.00   % SSP585-H (dark red)
-];
-
-% Store handles for legend
 legend_handles = gobjects(4,1);
 
-% Plot subplots
+% Plot each season
 for i = 1:5
     nexttile
     data = seasonal_data{i};
 
-    % Create grouped bar plot
     b = bar(data, 'grouped');
     for j = 1:4
         b(j).FaceColor = colors(j,:);
         if i == 1
-            legend_handles(j) = b(j); % Save only once
+            legend_handles(j) = b(j);
         end
     end
 
-    title([season_names{i} ' ΔT (°C)'], 'FontWeight', 'bold')
-    ylabel('ΔT (°C)')
+    title([season_names{i} ' ΔPrecip (%)'], 'FontWeight', 'bold')
+    ylabel('ΔPrecipitation (%)')
     xticks(1:8)
     xticklabels(regions)
     xtickangle(45)
-    ylim([1 3.5])
+    ylim([-25 20])
+    yline(0, '--k')  % zero-change reference line
     grid on
 end
 
-% Use last tile for legend
-% Use last tile (tile 6) for custom legend
-ax_dummy = nexttile(6);  % Select tile 6
-cla(ax_dummy);           % Clear anything just in case
-axis off                 % Hide dummy axes
-
-% Plot invisible bars for legend handles
+% Add legend in the 6th tile
+ax_dummy = nexttile(6);
+cla(ax_dummy)
+axis off
 hold on
 for j = 1:4
     ph(j) = plot(nan, nan, '-', 'LineWidth', 8, 'Color', colors(j,:));
 end
 hold off
-
-% Now create the legend explicitly on that dummy axes
 lgd = legend(ax_dummy, ph, scenarios, ...
     'Orientation', 'vertical', ...
     'Box', 'off', ...
-    'Location', 'north');  % Inside tile 6
-title(lgd, 'Mean (2021–2055) – Mean (1981–2015)', 'FontSize', 10)
+    'Location', 'north');
+title(lgd, '(Mean 2021–2055 − Mean 1981–2015) / Mean 1981–2015 × 100%', 'FontSize', 10)
 
 
 %% output the plot

@@ -1,139 +1,125 @@
 
 clear all; clc
 
-% Data for each category (rows = regions NW..CONUS, cols = SSP345-L, SSP345-H, SSP585-L, SSP585-H)
+% Define regions and scenarios
+regions = {'NW','SW','NGP','SGP','MW','SE','NE','CONUS'};
+scenarios = {'SSP345-L','SSP345-H','SSP585-L','SSP585-H'};
 
-rainfed_corn = [
-    0.03 0.04 0.03 0.03;
-    0.00 0.01 0.01 0.02;
-    0.44 0.52 0.52 0.56;
-    0.05 0.06 0.07 0.09;
-    0.79 0.77 0.60 0.64;
-    0.17 0.15 0.10 0.11;
-    0.29 0.28 0.19 0.22;
-    1.78 1.85 1.51 1.68];
+% Define delta T data for each season and annual
+annual = [
+    1.61 2.10 1.78 2.51;
+    1.55 2.07 1.76 2.44;
+    1.73 2.40 2.03 2.87;
+    1.46 1.94 1.68 2.30;
+    1.74 2.46 2.07 2.94;
+    1.38 1.82 1.59 2.20;
+    1.50 2.16 1.79 2.59;
+    1.58 2.14 1.82 2.55];
 
-rainfed_wheat = [
-    0.92 1.03 0.50 0.49;
-    0.58 0.58 0.32 0.34;
-    2.30 2.22 1.17 1.21;
-    1.52 1.63 0.82 0.88;
-    0.27 0.20 -0.10 -0.10;
-    0.08 0.08 -0.04 -0.04;
-    -0.02 -0.02 -0.04 -0.04;
-    5.64 5.72 2.63 2.74];
+djf = [
+    1.51 1.86 1.71 2.28;
+    1.44 1.82 1.67 2.31;
+    1.86 2.19 2.18 2.71;
+    1.40 1.61 1.65 2.20;
+    2.05 2.50 2.47 3.18;
+    1.24 1.49 1.54 2.04;
+    1.57 2.24 2.09 2.91;
+    1.59 1.95 1.89 2.50];
 
-rainfed_soybean = [
-    0.00 0.00 0.00 0.00;
-    0.02 0.02 0.02 0.01;
-    0.57 0.65 0.54 0.43;
-    -0.04 -0.05 0.05 -0.06;
-    1.15 1.13 0.96 0.73;
-    0.88 0.71 0.56 0.52;
-    0.18 0.09 0.08 0.11;
-    2.76 2.54 2.22 1.76];
+mam = [
+    1.48 1.82 1.52 2.10;
+    1.46 1.83 1.55 2.12;
+    1.58 2.11 1.83 2.47;
+    1.31 1.65 1.48 1.87;
+    1.54 2.05 1.82 2.38;
+    1.28 1.57 1.42 1.82;
+    1.43 1.89 1.62 2.24;
+    1.44 1.85 1.61 2.15];
 
-bioenergy_crop = [
-    0.20 0.18 0.14 0.14;
-    0.30 0.27 0.25 0.20;
-    0.23 0.20 0.18 0.17;
-    0.79 0.80 0.47 0.54;
-    0.29 0.32 0.22 0.17;
-    0.27 0.26 0.20 0.17;
-    0.09 0.08 0.05 0.04;
-    2.16 2.12 1.51 1.44];
+jja = [
+    1.75 2.47 2.04 2.97;
+    1.60 2.28 1.88 2.60;
+    1.79 2.66 2.10 3.19;
+    1.59 2.12 1.84 2.43;
+    1.79 2.56 2.06 3.06;
+    1.53 2.01 1.74 2.39;
+    1.58 2.17 1.75 2.52;
+    1.66 2.33 1.92 2.75];
 
-forest = [
-    -0.15 -0.18 0.81 0.81;
-    3.21 3.23 3.68 3.69;
-    -0.12 -0.16 0.46 0.45;
-    0.15 0.15 0.53 0.52;
-    0.07 0.21 0.62 0.68;
-    -0.58 -0.37 0.89 0.99;
-    -0.32 -0.22 0.11 0.10;
-    2.26 2.66 7.10 7.24];
-
-grass = [
-    -2.66 -2.68 -2.36 -2.37;
-    -3.91 -3.93 -2.86 -2.85;
-    -7.69 -7.77 -6.31 -6.23;
-    -6.18 -6.21 -5.26 -5.29;
-    -4.44 -4.42 -4.07 -3.98;
-    -4.23 -4.18 -3.83 -3.80;
-    -1.26 -1.27 -1.23 -1.24;
-    -30.39 -30.45 -25.91 -25.75];
-
-shrub = [
-    0.43 0.42 0.49 0.49;
-    2.35 2.37 2.75 2.76;
-    0.06 0.05 0.08 0.08;
-    0.20 0.20 0.27 0.27;
-    0.00 0.00 0.00 0.00;
-    0.00 0.00 0.00 0.00;
-    0.00 0.00 0.00 0.00;
-    3.03 3.04 3.59 3.60];
-
-urban = [
-    0.00 0.00 0.09 0.09;
-    0.01 0.01 0.24 0.24;
-    0.01 0.01 0.08 0.08;
-    0.02 0.02 0.21 0.21;
-    0.04 0.04 0.41 0.41;
-    -0.02 -0.02 0.45 0.45;
-    -0.02 -0.02 0.22 0.22;
-    0.04 0.04 1.70 1.70];
-
-bare_area = [
-    -0.58 -0.58 -0.58 -0.58;
-    -6.52 -6.52 -6.52 -6.52;
-    -0.85 -0.84 -0.85 -0.85;
-    -0.59 -0.59 -0.59 -0.59;
-    -0.01 -0.01 -0.01 -0.01;
-    -0.04 -0.04 -0.04 -0.04;
-    -0.01 -0.01 -0.01 -0.01;
-    -8.59 -8.59 -8.59 -8.59];
-
-% Put data in a cell array for easy looping
-data_all = {rainfed_corn, rainfed_wheat, rainfed_soybean, bioenergy_crop, forest, grass, shrub, urban, bare_area};
-titles_all = {'(a) Rainfed Corn', ' (b) Rainfed Wheat', '(c) Rainfed Soybean', '(d) Bioenergy Crop', '(e) Forest', '(f) Grass', '(g) Shrub', '(h) Urban', '(i) Bareground'};
+son = [
+    1.73 2.26 1.86 2.71;
+    1.72 2.38 1.97 2.75;
+    1.71 2.63 2.00 3.12;
+    1.55 2.37 1.77 2.69;
+    1.59 2.75 1.92 3.15;
+    1.46 2.20 1.66 2.55;
+    1.43 2.35 1.73 2.72;
+    1.61 2.44 1.86 2.83];
 
 
 
-% Define custom colors: light blue, dark blue, light red, dark red
+% Combine all into a cell array
+% Combine all into a cell array
+seasonal_data = {annual, djf, mam, jja, son};
+season_names = {'Annual','DJF','MAM','JJA','SON'};
+
+% Set up figure
+figure('Position', [100, 100, 1200, 900])
+t = tiledlayout(3,2, 'TileSpacing', 'compact', 'Padding', 'compact');
+
+% Set colors
 colors = [
-    0.70, 0.85, 1.00;  % SSP345-L
-    0.00, 0.30, 0.80;  % SSP345-H
-    1.00, 0.75, 0.75;  % SSP585-L
-    0.75, 0.00, 0.00   % SSP585-H
+    0.70, 0.85, 1.00;  % SSP345-L (light blue)
+    0.00, 0.30, 0.80;  % SSP345-H (dark blue)
+    1.00, 0.75, 0.75;  % SSP585-L (light red)
+    0.75, 0.00, 0.00   % SSP585-H (dark red)
 ];
 
+% Store handles for legend
+legend_handles = gobjects(4,1);
 
-figure;
-for i = 1:9
-    subplot(3,3,i);
-    b = bar(data_all{i}, 'grouped');
-    for k = 1:4
-        b(k).FaceColor = colors(k,:);
+% Plot subplots
+for i = 1:5
+    nexttile
+    data = seasonal_data{i};
+
+    % Create grouped bar plot
+    b = bar(data, 'grouped');
+    for j = 1:4
+        b(j).FaceColor = colors(j,:);
+        if i == 1
+            legend_handles(j) = b(j); % Save only once
+        end
     end
-    title(titles_all{i});
-    ylabel('2055 - 2015 (% CONUS)');
-    xticklabels({'NW','SW','NGP','SGP','MW','SE','NE','CONUS'});
-    xtickangle(45);
-    grid on;
-    if i == 1
-        legend({'atm45cooler_ssp3','atm45hotter_ssp3','atm85cooler_ssp5','atm85hotter_ssp5'}, ...
-    'Location', 'northwest', 'Interpreter', 'none');
-    end
+
+    title([season_names{i} ' ΔT (°C)'], 'FontWeight', 'bold')
+    ylabel('ΔT (°C)')
+    xticks(1:8)
+    xticklabels(regions)
+    xtickangle(45)
+    ylim([1 3.5])
+    grid on
 end
 
+% Use last tile for legend
+% Use last tile (tile 6) for custom legend
+ax_dummy = nexttile(6);  % Select tile 6
+cla(ax_dummy);           % Clear anything just in case
+axis off                 % Hide dummy axes
 
+% Plot invisible bars for legend handles
+hold on
+for j = 1:4
+    ph(j) = plot(nan, nan, '-', 'LineWidth', 8, 'Color', colors(j,:));
+end
+hold off
 
-
-
-
-
-
-
+% Now create the legend explicitly on that dummy axes
+lgd = legend(ax_dummy, ph, scenarios, ...
+    'Orientation', 'vertical', ...
+    'Box', 'off', ...
+    'Location', 'north');  % Inside tile 6
+title(lgd, 'Mean (2021–2055) – Mean (1981–2015)', 'FontSize', 10)
 
 
 %% output the plot
@@ -142,7 +128,7 @@ fig = gcf;
 fig.PaperUnits = 'inches';
 
 % fig.PaperPosition = [0 0 17.7 8];
-fig.PaperPosition = [0 0 12 8];
+fig.PaperPosition = [0 0 10 10];
 print('ScreenSizeFigure', '-dpng', '-r300')
 
 

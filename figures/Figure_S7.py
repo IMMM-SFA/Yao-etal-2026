@@ -1,132 +1,161 @@
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+# 1 'Northeast', 2 'Southeast', 4 'Midwest', 5'N. Great Plains', 6'S. Great Plains', 8'Northwest', 7'Southwest'
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib.patches import Rectangle
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
 
-sns.set_style("ticks")
+# state to NCA mapping CSV file
+nca_mapping_path = 'state_nca_mapping.csv'  
+nca_mapping = pd.read_csv(nca_mapping_path)
 
-models = ['cooler', 'hotter']
-duration_df = pd.read_csv('drought_timefrac_by_conus_nca_hist+future_withclimateonly_timeseries.csv')
-duration_dfs = {model: duration_df[duration_df['scenario'].str.endswith(f'-NF-{model}') | (duration_df['scenario'] == 'hist')].copy() for model in models}
 
-region_abbrev = {'CONUS': 'CONUS', 'Northeast': 'NE', 'Southeast': 'SE', 'Midwest': 'MW',
-                 'N. Great Plains': 'NGP', 'S. Great Plains': 'SGP', 'Northwest': 'NW', 'Southwest': 'SW'}
-region_order = ['CONUS', 'MW', 'NGP', 'SGP', 'NW', 'SW', 'SE', 'NE']
+# Colorblind-friendly colors for crops
+crop_colors = {
+    'corn': '#4c78a8',  # Blue
+    'wheat': '#f58518',  # Orange
+    'soybean': '#009e73'  # Teal
+}
 
-all_crop_results = {}
+plt.figure(figsize=(5, 5))
 
-def plot_drought_duration_only(duration_dfs, region_abbrev, region_order,
-                               output_file, add_legend=False):
-    """
-    Plots only the Drought Duration panel for all three crops in one figure (1 row × 3 columns).
-    Reuses as much logic as possible from the original function, but focuses on the duration metric.
-    Excludes the same regions as in your original calls.
-    """
-    crops = ['corn', 'wheat', 'soybean']
-    exclude_regions_list = [
-        ['NW', 'SW'],  # for corn
-        ['NE'],        # for wheat
-        ['NW', 'SW']   # for soybean
-    ]
-    subplot_labels = ['(a)', '(b)', '(c)']  
+# Data path
+path = '/data_path/'
 
-    fig, axes = plt.subplots(1, 3, figsize=(20, 5), sharey=True)  # Share y-axis since all are duration
+# Define region colors
+# Colorblind-friendly colors for regions
+region_colors = {
+    1: '#4c78a8',  # Northeast: Blue
+    2: '#f58518',  # Southeast: Orange
+    4: '#54a24b',  # Midwest: Olive green 
+    5: '#b79a20',  # N. Great Plains: Gold
+    6: '#7b4e99',  # S. Great Plains: Purple 
+    8: '#e45756',  # Northwest: Salmon
+    7: '#79706e'   # Southwest: Gray
+}
+region_names = {
+    1: 'NE',
+    2: 'SE',
+    4: 'MW',
+    5: 'NGP',
+    6: 'SGP',
+    8: 'NW',
+    7: 'SW'
+}
 
-    title = 'Drought Duration (% of Growing Season)'
-    value_col = 'drought_duration(% of growing season)'
-    scenario_groups = ['hist', 'RCP-only', 'RCP+SSP']
-    colors = {'hist': 'darkgrey', 'RCP-only': 'green', 'RCP+SSP': 'orange'}
 
-    for ax, crop, exclude_regions, label in zip(axes, crops, exclude_regions_list, subplot_labels):
-        df_dict = {model: duration_dfs[model][duration_dfs[model]['crop'] == crop].copy() for model in models}
-        for model in models:
-            df_dict[model]['region_abbrev'] = df_dict[model]['region_name'].map(region_abbrev)
-
-        if exclude_regions:
-            for model in models:
-                mask = df_dict[model]['region_abbrev'].isin(exclude_regions)
-                df_dict[model].loc[mask, value_col] = np.nan
-
-        member_stats = []
-        for model in models:
-            temp = df_dict[model].copy()
-            temp['scenario_clean'] = temp['scenario'].str.replace(f'-NF-{model}', '', regex=True)
-            temp['group'] = temp['scenario_clean'].map({
-                'hist': 'hist',
-                'RCP4.5': 'RCP-only',
-                'RCP8.5': 'RCP-only',
-                'SSP3-4.5': 'RCP+SSP',
-                'SSP5-8.5': 'RCP+SSP'
-            })
-            stats = temp.groupby(['region_abbrev', 'group', 'scenario_clean'])[value_col].mean().reset_index()
-            stats = stats.rename(columns={value_col: 'value'})
-            member_stats.append(stats)
-        all_members = pd.concat(member_stats, ignore_index=True)
-        summary = (all_members.groupby(['region_abbrev', 'group'])
-                              .agg(mean=('value', 'mean'),
-                                   lower=('value', 'min'),
-                                   upper=('value', 'max'))
-                              .reset_index()
-                              .rename(columns={'group': 'scenario'}))
-
-        full_grid = pd.DataFrame([(r, s) for r in region_order for s in scenario_groups],
-                                 columns=['region_abbrev', 'scenario'])
-        summary = pd.merge(full_grid, summary, on=['region_abbrev', 'scenario'], how='left')
-        summary['region_abbrev'] = pd.Categorical(summary['region_abbrev'], categories=region_order, ordered=True)
-        summary = summary.sort_values(['region_abbrev', 'scenario']).reset_index(drop=True)
-
-        # Plotting
-        bar_width = 0.25
-        for i, region in enumerate(region_order):
-            region_data = summary[summary['region_abbrev'] == region]
-            for j, scenario in enumerate(scenario_groups):
-                row = region_data[region_data['scenario'] == scenario]
-                mean_val = row['mean'].iloc[0] if not row.empty and pd.notna(row['mean'].iloc[0]) else 0.0
-                lower = row['lower'].iloc[0] if not row.empty and pd.notna(row['lower'].iloc[0]) else mean_val
-                upper = row['upper'].iloc[0] if not row.empty and pd.notna(row['upper'].iloc[0]) else mean_val
-                x_pos = i + (j - 1) * bar_width
-                ax.bar(x_pos, mean_val, bar_width,
-                       color=colors[scenario], edgecolor='black', linewidth=1.0,
-                       alpha=0.85 if mean_val > 0 else 0.0)
-                if scenario != 'hist' and mean_val > 0:
-                    ax.errorbar(x_pos, mean_val,
-                                yerr=[[mean_val - lower], [upper - mean_val]],
-                                color='black', capsize=4, capthick=1.5, linewidth=1.5)
-
-        ax.set_xticks(range(len(region_order)))
-        ax.set_xticklabels(region_order)
-        ax.tick_params(axis='x', rotation=0, labelsize=14)
-        ax.tick_params(axis='y', labelsize=16)
-        ax.text(0.05, 0.95, label, transform=ax.transAxes, fontsize=20, va='top', ha='left')
-        ax.set_ylim(30, 80)  
-
-    fig.text(0.08, 0.5, 'Drought Duration\n(% of Growing Season)', fontsize=18, va='center', ha='center', rotation='vertical')
-
-    if add_legend:
-        color_elements = [
-            Rectangle((0,0),1,1, fc=colors[s], ec='black', lw=0.8, alpha=0.9, label=l)
-            for s, l in zip(scenario_groups, ['Historical', 'RCP-only', 'RCP+SSP'])
-        ]
-        legend_ax = fig.add_axes([0, 0, 0.01, 0.01])
-        legend_ax.set_xlim(0,1); legend_ax.set_ylim(0,1)
-        legend_ax.axis('off')
-        eb = legend_ax.errorbar(0.5, 0.5, yerr=0.25,
-                                color='black', capsize=3, capthick=1.2, lw=1.2,
-                                fmt='none')
-        eb_handle = eb
-        fig.legend(handles=color_elements + [eb_handle],
-                   labels=['Historical', 'ATM-only', 'ATM+LAND', 'Range across 4 scenarios'],
-                   loc='lower center', bbox_to_anchor=(0.5, -0.02),
-                   ncol=4, fontsize=15, frameon=False,
-                   handlelength=2.2, handletextpad=0.4, columnspacing=1.6)
-        legend_ax.remove()
-
-    plt.tight_layout(rect=[0.1, 0.1, 1, 1])  
-    plt.savefig(output_file, bbox_inches='tight', dpi=300)
-    plt.show()
+# Create figure and split axes
+fig = plt.figure(figsize=(5, 6))  # Increased height for two subplots
+fig.set_facecolor('white')  # Ensure consistent background
+ax = plt.gca()
+ax.set_facecolor('white')  # Match subplot background to figure
+divider = make_axes_locatable(ax)
+ax_top = divider.append_axes("top", size="40%", pad=0.0, sharex=ax)
+ax_bottom = ax  # Bottom axis is the main axis
+ax_top.spines['bottom'].set_visible(False)  # Hide bottom spine of top subplot
+ax_bottom.spines['top'].set_visible(False)  # Hide top spine of bottom subplot
+# Plot on both axes
+for crop in ['corn']:
+    ## near future
+    df_345c_nf = pd.read_csv(f'{path}{crop}_financial_loss_nf_3_45_c_2021-2055.csv')
+    df_585c_nf = pd.read_csv(f'{path}{crop}_financial_loss_nf_5_85_c_2021-2055.csv')
+    df_345h_nf = pd.read_csv(f'{path}{crop}_financial_loss_nf_3_45_h_2021-2055.csv')
+    df_585h_nf = pd.read_csv(f'{path}{crop}_financial_loss_nf_5_85_h_2021-2055.csv')
+    # Merge the NCA mapping to the original data based on 'state_id'
+    df_345c_nf = df_345c_nf.merge(nca_mapping, on='state_id', how='left')
+    df_585c_nf = df_585c_nf.merge(nca_mapping, on='state_id', how='left')
+    df_345h_nf = df_345h_nf.merge(nca_mapping, on='state_id', how='left')
+    df_585h_nf = df_585h_nf.merge(nca_mapping, on='state_id', how='left')
+    # Replace zeros with a small value (1e-10) to avoid division by zero
+    df_585c_nf['Financial_Loss($)'] = df_585c_nf['Financial_Loss($)'].replace(0, 1e-10)
+    df_585h_nf['Financial_Loss($)'] = df_585h_nf['Financial_Loss($)'].replace(0, 1e-10)
+    # Group by 'Year' for CONUS aggregates
+    df_345c_conus_nf = df_345c_nf.groupby('Year').sum()[['Production_Loss(ton)', 'Financial_Loss($)']]
+    df_585c_conus_nf = df_585c_nf.groupby('Year').sum()[['Production_Loss(ton)', 'Financial_Loss($)']]
+    df_345h_conus_nf = df_345h_nf.groupby('Year').sum()[['Production_Loss(ton)', 'Financial_Loss($)']]
+    df_585h_conus_nf = df_585h_nf.groupby('Year').sum()[['Production_Loss(ton)', 'Financial_Loss($)']]
+    # Replace zeros in CONUS aggregates
+    df_585c_conus_nf['Financial_Loss($)'] = df_585c_conus_nf['Financial_Loss($)'].replace(0, 1e-10)
+    df_585h_conus_nf['Financial_Loss($)'] = df_585h_conus_nf['Financial_Loss($)'].replace(0, 1e-10)
+    # Now group by 'nca_id' and 'Year' for regional data
+    df_345c_nca_nf = df_345c_nf.groupby(['nca_id', 'Year']).sum()[['Production_Loss(ton)', 'Financial_Loss($)']]
+    df_585c_nca_nf = df_585c_nf.groupby(['nca_id', 'Year']).sum()[['Production_Loss(ton)', 'Financial_Loss($)']]
+    df_345h_nca_nf = df_345h_nf.groupby(['nca_id', 'Year']).sum()[['Production_Loss(ton)', 'Financial_Loss($)']]
+    df_585h_nca_nf = df_585h_nf.groupby(['nca_id', 'Year']).sum()[['Production_Loss(ton)', 'Financial_Loss($)']]
+    # Calculate the relative difference in financial loss
+    diff_h_nf = (df_345h_nca_nf['Financial_Loss($)'] - df_585h_nca_nf['Financial_Loss($)']) / df_585h_nca_nf['Financial_Loss($)'] * 100
+    diff_c_nf = (df_345c_nca_nf['Financial_Loss($)'] - df_585c_nca_nf['Financial_Loss($)']) / df_585c_nca_nf['Financial_Loss($)'] * 100
+    diff_nf = (diff_c_nf + diff_h_nf)/2.0
+    diff_nf = diff_c_nf
     
+    # Calculate the relative change in financial loss for CONUS
+    diff_h_nf_conus = (df_345h_conus_nf['Financial_Loss($)'] - df_585h_conus_nf['Financial_Loss($)']) / df_585h_conus_nf['Financial_Loss($)'] * 100
+    diff_c_nf_conus = (df_345c_conus_nf['Financial_Loss($)'] - df_585c_conus_nf['Financial_Loss($)']) / df_585c_conus_nf['Financial_Loss($)'] * 100
+    # diff_nf_conus = (diff_c_nf_conus + diff_h_nf_conus)/2.0
+    diff_nf_conus = diff_c_nf_conus 
+    
+    # Apply Kernel Density Estimation (KDE) for smoothing
+    kde_nf_conus = gaussian_kde(diff_nf_conus, bw_method=0.1)
+    x_nf_conus = np.linspace(min(diff_nf_conus), max(diff_nf_conus), 2000)
+    pdf_nf_conus = kde_nf_conus.evaluate(x_nf_conus)
+    cdf_nf_conus = np.cumsum(pdf_nf_conus) * (x_nf_conus[1] - x_nf_conus[0]) / np.max(np.cumsum(pdf_nf_conus) * (x_nf_conus[1] - x_nf_conus[0]))
+    
+    # Plot CONUS on both axes
+    ax_top.plot(x_nf_conus, cdf_nf_conus, linestyle='-', color='black', linewidth=3, label='CONUS')
+    ax_bottom.plot(x_nf_conus, cdf_nf_conus, linestyle='-', color='black', linewidth=3, label='CONUS')
+    # Find x-value where CDF reaches y=0.99 for CONUS
+    idx_conus = np.argmin(np.abs(cdf_nf_conus - 0.99))
+    x_conus_99 = x_nf_conus[idx_conus]
+    ax_top.vlines(x=x_conus_99, ymin=0.9, ymax=0.99, color='black', linestyle=':', linewidth=1.5, alpha=0.7)
+    ax_bottom.vlines(x=x_conus_99, ymin=0, ymax=min(0.99, 0.9), color='black', linestyle=':', linewidth=1.5, alpha=0.7)
+    # Iterate through each NCA and apply KDE for each NCA
+    ax_bottom.text(x_conus_99 - 20, 0.015, f'{x_conus_99:.0f}', color='black', fontsize=12, ha='left', va='center', weight="bold") # crop_colors[crop],
+    
+    for nca_id in [4, 5, 6]:
+        diff_nf_nca = diff_nf.loc[nca_id].dropna()
+        kde_nf = gaussian_kde(diff_nf_nca, bw_method=0.1)
+        x_nf = np.linspace(min(diff_nf_nca), max(diff_nf_nca), 2000)
+        pdf_nf = kde_nf.evaluate(x_nf)
+        cdf_nf = np.cumsum(pdf_nf) * (x_nf[1] - x_nf[0]) / np.max(np.cumsum(pdf_nf) * (x_nf[1] - x_nf[0]))
+        # Plotting the CDF for the relative change in financial loss for each NCA
+        ax_top.plot(x_nf, cdf_nf, linestyle='-', color=region_colors[nca_id], linewidth=2, label=f'{region_names[nca_id]}')
+        ax_bottom.plot(x_nf, cdf_nf, linestyle='-', color=region_colors[nca_id], linewidth=2, label=f'{region_names[nca_id]}')
+        # Find x-value where CDF reaches y=0.99 for this region
+        idx_nca = np.argmin(np.abs(cdf_nf - 0.99))
+        x_nca_99 = x_nf[idx_nca]
+        ax_top.vlines(x=x_nca_99, ymin=0.9, ymax=0.99, color=region_colors[nca_id], linestyle=':', linewidth=1.5, alpha=0.7)
+        ax_bottom.vlines(x=x_nca_99, ymin=0, ymax=min(0.99, 0.9), color=region_colors[nca_id], linestyle=':', linewidth=1.5, alpha=0.7)
+        if nca_id == 6:
+            ax_bottom.text(x_nca_99+2 , 0.015, f'{x_nca_99:.0f}', color=region_colors[nca_id], fontsize=12, ha='left', va='center', weight="bold")
+        elif nca_id == 4:
+            ax_bottom.text(x_nca_99 -15, 0.015, f'{x_nca_99:.0f}', color=region_colors[nca_id], fontsize=12, ha='left', va='center', weight="bold")
+        elif nca_id == 5:
+            ax_bottom.text(x_nca_99-4, 0.015, f'{x_nca_99:.0f}', color=region_colors[nca_id], fontsize=12, ha='left', va='center', weight="bold")   
+        elif nca_id == 8:
+            ax_bottom.text(x_nca_99-7, 0.015, f'{x_nca_99:.0f}', color=region_colors[nca_id], fontsize=12, ha='left', va='center', weight="bold")   
+            
+# Final plot settings
+ax_top.set_ylim(0.90, 1.0)  # Zoomed-in range for high probabilities
+ax_bottom.set_ylim(0, 0.90)  # Lower range to align at y=0.9
+ax_top.set_xlim(-80, 150)
+ax_bottom.set_xlim(-80, 150)
+ax_bottom.set_xlabel('atm45_ssp3 vs atm85_ssp5 in Financial Loss (%)', fontsize=14)
+# ax_bottom.set_ylabel('Cumulative Probability', fontsize=14, labelpad=10)
+# Final plot settings
+fig.text(-0.001, 0.5, 'Cumulative Probability', rotation=90, ha='center', va='center', fontsize=16)
+fig.text(0.23, 0.93, '(a1) Corn', rotation=0, ha='center', va='center', fontsize=14)
 
-plot_drought_duration_only(duration_dfs, region_abbrev, region_order,
-                           output_file='duration.png',
-                           add_legend=True)
+ax_top.set_ylabel('', fontsize=14)  # No y-label for top axis
+ax_top.tick_params(axis='x', which='both', bottom=False, labelbottom=False)  # Hide x-ticks on top axis
+ax_top.set_yticks([0.95, 0.99])  # Ticks for top axis
+ax_bottom.set_yticks([0, 0.3, 0.6, 0.9])  # Ticks for bottom axis, including 0.9
+ax_top.tick_params(axis='y', labelsize=14)
+ax_bottom.tick_params(axis='both', labelsize=14)
+ax_top.grid(True, linestyle='--', alpha=0.7, which='major', axis='y')
+ax_bottom.grid(True, linestyle='--', alpha=0.7, which='major', axis='y')
+ax_top.axvline(x=0, color='gray', linestyle='--', linewidth=2, alpha=0.8)
+ax_bottom.axvline(x=0, color='gray', linestyle='--', linewidth=2, alpha=0.8)
+# ax_bottom.legend(fontsize=12, loc='center right')
+fig.tight_layout(pad=0.5)
+plt.savefig(f'{path}/financial_loss_345diff585_corn_cooler.png', dpi=300, bbox_inches='tight')
+print ('done')
