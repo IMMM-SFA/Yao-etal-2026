@@ -328,7 +328,7 @@ for idx, crop in enumerate(['corn', 'wheat', 'soybean']):
     ax.set_title(crop.capitalize(), fontsize=21, pad=20)
     ax.tick_params(axis='x', labelsize=18)
     ax.axvline(0, color='black', linewidth=1)
-    ax.set_xlabel('Change in production loss\n(% of CONUS historical)', fontsize=20)
+    ax.set_xlabel('Change in crop loss\n(% of CONUS historical)', fontsize=20)
 
     if idx == 0:
         err = ax.errorbar(999, 999, xerr=1,
