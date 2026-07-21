@@ -34,7 +34,7 @@ Land-use and atmospheric shifts jointly amplify U.S. drought-driven crop losses.
 | Model | Version | URL | DOI |
 |:-----:|:-------:|:---:|:---:|
 | CLM5  |  ctsm5.1.dev118 | https://github.com/IMMM-SFA/im3-clm | https://zenodo.org/records/6653705 |
-| IM3 Components | 0cf45e8 | https://github.com/IMMM-SFA/im3components/tree/main/im3components/wrf\_to\_clm | |
+| IM3 Components | 0cf45e8 | https://github.com/IMMM-SFA/im3components/tree/main/im3components/wrf_to_clm | |
 
 ## Reproduce my experiment
 
