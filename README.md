@@ -1,6 +1,6 @@
 <!--[![DOI](https://zenodo.org/badge/265254045.svg)](https://zenodo.org/doi/10.5281/zenodo.10442485)-->
 
-# yao_etal_2026
+# Yao_etal_2026
 
 **Land-use and atmospheric shifts jointly amplify U.S. drought-driven crop losses**
 
