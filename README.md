@@ -15,7 +15,7 @@ Lili Yao<sup>1*</sup>, Hongxiang Yan<sup>1</sup>, Ning Sun<sup>1*</sup>, Eva Sin
 Agricultural drought (AD), driven by root-zone soil moisture deficits, poses a major threat to food security. However, its future risk is commonly assessed by treating land-use and land-cover change (LULCC) and atmospheric shifts as independent drivers, overlooking their interacting and compounding effects. To address this gap, we use an integrated, multi-scale, multi-sector modeling framework to project AD risk for corn and soybean across the contiguous United States (CONUS) through 2055 under a range of plausible futures that link thermodynamic changes and LULCC pathways through shared socioeconomic and emissions scenarios. Model projections reveal sharp increases in drought-driven crop production losses. These losses are estimated as the drought-affected cultivated area multiplied by the yield deficit between the non-drought reference yield and simulated yield. Projected future losses rise by nearly 60% for corn and 135% for soybean relative to historical levels.  LULCC acts as a driver of similar magnitude to atmospheric change, with the strongest amplification occurring where cropland expansion overlaps with drought-prone areas, such as the Great Plains. These findings highlight that interactions between LULCC and atmospheric shifts shape future agricultural drought risk and should be jointly considered to support effective adaptation and food-system planning.
 
 ## Journal reference
-CLand-use and atmospheric shifts jointly amplify U.S. drought-driven crop losses. Accepted by npj Natural Hazards – April 2026.
+CLand-use and atmospheric shifts jointly amplify U.S. drought-driven crop losses. Accepted by npj Natural Hazards – July 2026.
 
 ## Data Reference
 
@@ -45,19 +45,43 @@ Use the scripts found in the `figures` directory to reproduce the figures used i
 
 | Figure Numbers | Script Name | Description | Figure |
 |:--------------:|:-----------:|:-----------:|:------:|
-| 1  | [Figure_1.py](./figures/Figure_1.py) | Validation of CLM’s performance | <a href="./figures/figures/Figure_1.png"><img width="100" src="./figures/figures/Figure_1.png"/></a> |
-| 2  | [Figure_2.m](./figures/Figure_2.m) | Rainfed crop planting areas changes  | <a href="./figures/figures/Figure_2.png"><img width="100" src="./figures/figures/Figure_2.png"/></a> |
-| 3  | [Figure_3.py](./figures/Figure_3.py) | Drought exposure and intensity | <a href="./figures/figures/Figure_3.png"><img width="100" src="./figures/figures/Figure_3.png"/></a> |
-| 4  | [Figure_4.py](./figures/Figure_4.py) | Mean projected changes in production loss | <a href="./figures/figures/Figure_4.png"><img width="100" src="./figures/figures/Figure_4.png"/></a> |
-| 5  | [Figure_5.py](./figures/Figure_5.py) | Scenario and ESM variant uncertainty in projection | <a href="./figures/figures/Figure_5.png"><img width="100" src="./figures/figures/Figure_5.png"/></a> |
-| 6  | [Figure_6.py](./figures/Figure_6.py) | Relative differences in financial loss between scenarios | <a href="./figures/figures/Figure_6.png"><img width="100" src="./figures/figures/Figure_6.png"/></a> |
-| S1  | [Figure_S1.py](./figures/Figure_S1.py) | Projected changes for nine land use and land cover types | <a href="./figures/figures/Figure_S1.png"><img width="100" src="./figures/figures/Figure_S1.png"/></a> |
-| S2  | [Figure_S2.m](./figures/Figure_S2.m) | Projected changes in annual and seasonal air temperature | <a href="./figures/figures/Figure_S2.png"><img width="100" src="./figures/figures/Figure_S2.png"/></a> |
-| S3  | [Figure_S3.m](./figures/Figure_S3.m) | Projected changes in annual and seasonal precipitation | <a href="./figures/figures/Figure_S3.png"><img width="100" src="./figures/figures/Figure_S3.png"/></a> |
-| S4  | [Figure_S4.m](./figures/Figure_S4.m) | Projected changes in annual and seasonal potential evapotranspiration | <a href="./figures/figures/Figure_S4.png"><img width="100" src="./figures/figures/Figure_S4.png"/></a> |
-| S5  | [Figure_S5.m](./figures/Figure_S5.m) | Projected changes in annual and seasonal aridity index | <a href="./figures/figures/Figure_S5.png"><img width="100" src="./figures/figures/Figure_S5.png"/></a> |
-| S6  | [Figure_S6.m](./figures/Figure_S6.m) | Agricultural drought duration under historical and future scenarios | <a href="./figures/figures/Figure_S6.png"><img width="100" src="./figures/figures/Figure_S6.png"/></a> |
-| S7  | [Figure_S7.py](./figures/Figure_S7.py) | Relative differences in financial loss for cooler and hotter variants | <a href="./figures/figures/Figure_S7.png"><img width="100" src="./figures/figures/Figure_S7.png"/></a> |
-| S8  | [Figure_S8.py](./figures/Figure_S8.py) | Ratio of crop prices between scenarios | <a href="./figures/figures/Figure_S8.png"><img width="100" src="./figures/figures/Figure_S8.png"/></a> |
+| 1  | [Figure_1.py](./figures/Figure_1.py) | Validation of CLM5’s performance | <a href="./figures/Figure_1.png"><img width="100" src="./figures/Figure_1.png"/></a> |
+| 2  | [Figure_2.m](./figures/Figure_2.m) | Rainfed crop planting areas changes  | <a href="./figures/Figure_2.png"><img width="100" src="./figures/Figure_2.png"/></a> |
+| 3  | [Figure_3.py](./figures/Figure_3.py) | Drought exposure and intensity | <a href="./figures/Figure_3.png"><img width="100" src="./figures/Figure_3.png"/></a> |
+| 4  | [Figure_4.py](./figures/Figure_4.py) | Mean projected changes in production loss | <a href="./figures/Figure_4.png"><img width="100" src="./figures/Figure_4.png"/></a> |
+| 5  | [Figure_5.py](./figures/Figure_5.py) | Scenario and ESM variant uncertainty in projection | <a href="./figures/Figure_5.png"><img width="100" src="./figures/Figure_5.png"/></a> |
+| 6  | [Figure_6.py](./figures/Figure_6.py) | Relative differences in financial loss between scenarios | <a href="./figures/Figure_6.png"><img width="100" src="./figures/Figure_6.png"/></a> |
+| S1  | [Figure_S1.py](./figures/Figure_S1.m) | Projected changes for nine land use and land cover types | <a href="./figures/Figure_S1.png"><img width="100" src="./figures/figures/Figure_S1.png"/></a> |
+| S2  | [Figure_S2.m](./figures/Figure_S2.m) | Projected changes in annual and seasonal air temperature | <a href="./figures/Figure_S2.png"><img width="100" src="./figures/Figure_S2.png"/></a> |
+| S3  | [Figure_S3.m](./figures/Figure_S3.m) | Projected changes in annual and seasonal precipitation | <a href="./figures/Figure_S3.png"><img width="100" src="./figures/Figure_S3.png"/></a> |
+| S4  | [Figure_S4.m](./figures/Figure_S4.m) | Projected changes in annual and seasonal potential evapotranspiration | <a href="./figures/figures/Figure_S4.png"><img width="100" src="./figures/Figure_S4.png"/></a> |
+| S5  | [Figure_S5.m](./figures/Figure_S5.m) | Projected changes in annual and seasonal aridity index | <a href="./figures/Figure_S5.png"><img width="100" src="./figures/Figure_S5.png"/></a> |
+| S6  | [Figure_S6.m](./figures/Figure_S6.m) | Agricultural drought duration under historical and future scenarios | <a href="./figures/Figure_S6.png"><img width="100" src="./figures/Figure_S6.png"/></a> |
+| S7  | [Figure_S7.py](./figures/Figure_S7.py) | Relative differences in financial loss for cooler and hotter variants | <a href="./figures/Figure_S7.png"><img width="100" src="./figures/Figure_S7.png"/></a> |
+| S8  | [Figure_S8.py](./figures/Figure_S8.py) | Ratio of crop prices between scenarios | <a href="./figures/figures/Figure_S8.png"><img width="100" src="./figures/Figure_S8.png"/></a> |
+| S9  | [Figure_S9.py](./figures/Figure_S9.py) | [ Annual crop production losses and commodity prices across scenarios and 
+major producing regions] | <a href="./figures/Figure_S9.png"><img width="100" src="./figures/Figure_S9.png"/></a> |
+| S10 | [Figure_S10.py](./figures/Figure_S10.py) | [Sensitivity analysis using median non-drought reference yields quantifies 
+warming and land-use contributions to corn and soybean production losses] | <a href="./figures/Figure_S10.png"><img width="100" src="./figures/Figure_S10.png"/></a> |
+| S11 | [Figure_S11.py](./figures/Figure_S11.py) | [ Sensitivity analysis using median non-drought reference yields quantifies 
+scenario and Earth System Model (ESM)-variant divergence in crop production losses] | <a href="./figures/Figure_S11.png"><img width="100" src="./figures/Figure_S11.png"/></a> |
+| S12 | [Figure_S12.py](./figures/Figure_S12.py) | [Sensitivity analysis using median non-drought reference yields compares 
+scenario-driven financial-loss differences for corn and soybean] | <a href="./figures/Figure_S12.png"><img width="100" src="./figures/Figure_S12.png"/></a> |
+| S13 | [Figure_S13.py](./figures/Figure_S13.py) | [Sensitivity to a stricter SSMI drought threshold is evaluated for corn and 
+soybean drought exposure and intensity] | <a href="./figures/Figure_S13.png"><img width="100" src="./figures/Figure_S13.png"/></a> |
+| S14 | [Figure_S14.py](./figures/Figure_S14.py) | [Sensitivity to a stricter SSMI drought threshold is evaluated for warming and 
+land-use contributions to crop production losses] | <a href="./figures/Figure_S14.png"><img width="100" src="./figures/Figure_S14.png"/></a> |
+| S15 | [Figure_S15.py](./figures/Figure_S15.py) | [Sensitivity to a stricter SSMI threshold is evaluated for scenario and Earth 
+System Model (ESM)-variant divergence in crop production losses] | <a href="./figures/Figure_S15.png"><img width="100" src="./figures/Figure_S15.png"/></a> |
+| S16 | [Figure_S16.py](./figures/Figure_S16.py) | [Sensitivity to a stricter SSMI threshold is evaluated for scenario-driven 
+financial-loss differences] | <a href="./figures/Figure_S16.png"><img width="100" src="./figures/Figure_S16.png"/></a> |
+| S17 | [Figure_S17.py](./figures/Figure_S17.py) | [CLM5 wheat simulations are evaluated against observed production, yield 
+anomalies, and insurance indemnities in the Northern Great Plains] | <a href="./figures/Figure_S17.png"><img width="100" src="./figures/Figure_S17.png"/></a> |
+| S18 | [Figure_S18.py](./figures/Figure_S18.py) | [Future land-use and atmospheric changes affect wheat area, drought 
+exposure, production losses, and financial losses] | <a href="./figures/Figure_S18.png"><img width="100" src="./figures/Figure_S18.png"/></a> |
+| S19 | [Figure_S19.py](./figures/Figure_S19.py) | [Sensitivity analysis using a September–June growing season quantifies future 
+wheat drought exposure, intensity, and duration] | <a href="./figures/Figure_S19.png"><img width="100" src="./figures/Figure_S19.png"/></a> |
+| S20 | [Figure_S20.py](./figures/Figure_S20.py) | [Seasonal patterns of the wheat productivity and future soil-moisture changes
+in the Southern Great Plains] | <a href="./figures/Figure_S20.png"><img width="100" src="./figures/Figure_S20.png"/></a> |
 
 
