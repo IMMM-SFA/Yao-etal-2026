@@ -1,4 +1,4 @@
-############################################ the first part of the figure 
+############################################ plot a-g
 from scipy.stats import pearsonr
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,17 +10,13 @@ grfr_df = pd.read_csv("regional_sri_grfr.csv", index_col="time")
 clm_df.index = pd.to_datetime(clm_df.index)
 grfr_df.index = pd.to_datetime(grfr_df.index)
 
-# Define regions and corresponding labels
-regions = ['NE', 'SE', 'MW', 'NGP', 'SGP', 'NW', 'SW']
-labels = ['(a1)', '(a2)', '(a3)', '(a4)', '(a5)', '(a6)', '(a7)']
+regions = ['NE',  'SE',   'MW',   'NGP',   'SGP', 'NW',    'SW']
+labels = ['(c)', '(d)', '(b)', '(a)', '(e)', '(g)', '(f)']
 
-# Verify that both dataframes have the same regions
 assert set(clm_df.columns) == set(grfr_df.columns) == set(regions), "Region columns do not match"
 
-# Create individual scatter plots for each region
 for region, label in zip(regions, labels):
-
-    plt.figure(figsize=(4, 4))  
+    plt.figure(figsize=(4, 4))  # Square figure for equal axis length
     
     # Extract SRI values for the region
     clm_sri = clm_df[region]
@@ -31,16 +27,17 @@ for region, label in zip(regions, labels):
     clm_valid = clm_sri[valid]
     grfr_valid = grfr_sri[valid]
     
-    # Calculate Pearson correlation
+    # Calculate Pearson correlation and p-value
     if len(clm_valid) > 1:  # Ensure enough data points
-        r, _ = pearsonr(clm_valid, grfr_valid)
-        print(f"{region}: r = {r:.2f}")
+        r, p_value = pearsonr(clm_valid, grfr_valid)
+        print(f"{region}: r = {r:.2f}, p-value = {p_value:.3f}")
     else:
         print(f"{region}: Insufficient data for correlation")
         r = np.nan
+        p_value = np.nan
     
     # Scatter plot
-    plt.scatter( grfr_sri, clm_sri, alpha=0.5, s=20)
+    plt.scatter(grfr_sri, clm_sri, alpha=0.5, s=20)
     
     # Determine the same range for x and y axes
     min_val = min(clm_sri.min(), grfr_sri.min())
@@ -61,21 +58,33 @@ for region, label in zip(regions, labels):
     # Add 1:1 line
     plt.plot([axis_min, axis_max], [axis_min, axis_max], 'r--', label='1:1 line')
     
+    # Add Pearson r and p-value in the upper left
+    corr_text = f"Pearson r = {r:.2f}\np-value = {p_value:.3f}"
+    plt.text(
+        0.05, 0.95, corr_text,
+        transform=plt.gca().transAxes,
+        verticalalignment='top',
+        horizontalalignment='left',
+        fontsize=10,
+        bbox=dict(boxstyle="round", facecolor="white", alpha=0.6)
+    )
+    
     # Set labels and title
-    plt.ylabel('CLM5 SRI', fontsize=14)
-    plt.xlabel('GRFR SRI', fontsize=14)
-    plt.title(f'{label} {region} (r={r:.2f})', fontsize=14)
+    plt.xlabel('GRFR SRI (-)', fontsize=14)
+    plt.ylabel('CLM5 SRI (-)', fontsize=14)
+    plt.title(f'{label} {region}', fontsize=14)
     plt.legend(loc='lower right')
     
+    # Ensure equal aspect ratio for same axis length
     plt.gca().set_aspect('equal', adjustable='box')
     
+    # Save the individual plot
     plt.tight_layout()
     plt.savefig(f'clm_grfr_sri_scatter_{region}.png')
     plt.close()
     
     
-    
-############################################ the second part of the figure    
+############################################ plot h, k    
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import linregress, pearsonr
@@ -96,7 +105,6 @@ usda_harvested_area = df_usda_area[['State', 'Year', 'Value']].rename(columns={'
 production_target_items = [
 'CORN, GRAIN - PRODUCTION, MEASURED IN BU'
 ]
-
 
 df_usda_production = df_usda[df_usda['Data Item'].isin(production_target_items)]
 usda_production = df_usda_production[['State', 'Year', 'Value']].rename(columns={'Value': 'Production(BU)'})
@@ -127,7 +135,7 @@ comparison = pd.merge(
 
 fig, ax = plt.subplots(1, 1, figsize=(4, 4))
 
-plt.scatter(comparison['Production(BU)_usda']/39.368,comparison['Production(BU)_clm']/39.368, color='blue',s=10) # convert the unit from bu to ton
+plt.scatter(comparison['Production(BU)_usda']/39.368,comparison['Production(BU)_clm']/39.368, color='blue',s=10) 
 correlation_coefficient, p_value = pearsonr(comparison['Production(BU)_usda'],comparison['Production(BU)_clm'])
 print ('correlation_coefficient, p_value',correlation_coefficient, p_value)
 
@@ -161,15 +169,142 @@ ax.yaxis.set_major_locator(ticker.LogLocator(base=10.0, numticks=10))
 ax.xaxis.set_minor_formatter(ticker.NullFormatter())
 ax.yaxis.set_minor_formatter(ticker.NullFormatter())
 
-plt.title('(b1) Corn annual production (ton)')
-plt.xlabel('USDA-NASS',fontsize=12)
-plt.ylabel('CLM5',fontsize=12)
+plt.title('(h) Corn')
+plt.xlabel('USDA-NASS Annual production (ton)',fontsize=12)
+plt.ylabel('CLM5 Annual production (ton)',fontsize=12)
 plt.tick_params(axis='both', labelsize=12) 
 plt.tight_layout()
 plt.savefig('USDA_vs_CLM_corn_state-year.png', dpi=500, bbox_inches='tight')
 
+############################################ plot i, l
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import pandas as pd
 
-############################################ the first part of the figure 
+path = '/path_to_data_dir/'
+df_usda = pd.read_csv(f'{path}state_corn_usda_1981-2015.csv')
+df_usda['Value'] = pd.to_numeric(df_usda['Value'].str.replace(',', ''), errors='coerce')
+
+# Harvested Area
+area_target_items = ['CORN, GRAIN - ACRES HARVESTED']
+df_usda_area = df_usda[df_usda['Data Item'].isin(area_target_items)]
+usda_harvested_area = df_usda_area[['State', 'Year', 'Value']].rename(columns={'Value': 'Harvest_Area(acre)'})
+
+# Production
+production_target_items = ['CORN, GRAIN - PRODUCTION, MEASURED IN BU']
+df_usda_production = df_usda[df_usda['Data Item'].isin(production_target_items)]
+usda_production = df_usda_production[['State', 'Year', 'Value']].rename(columns={'Value': 'Production(BU)'})
+
+# Merge USDA and calculate Yield
+usda_merged = pd.merge(usda_harvested_area ,usda_production , on = ['State','Year'])
+usda_merged['Yield_bu_per_acre'] = usda_merged['Production(BU)'] / usda_merged['Harvest_Area(acre)']
+
+# Check data availability per state for Total Corn ---
+state_summary = usda_merged.groupby('State').agg(
+    Years_of_Data=('Year', 'count'),  # Counts the number of rows (years) per state
+    Start_Year=('Year', 'min'),       # Finds the earliest year
+    End_Year=('Year', 'max')          # Finds the latest year
+).reset_index()
+state_summary = state_summary.sort_values(by='Years_of_Data', ascending=False)
+
+
+df_clm = pd.read_csv('/path_to_data_dir/corn_1981-2015.csv')
+state_list = list(np.unique(usda_merged['State']))
+
+df_clm_filtered = df_clm[df_clm['State_Name'].isin(state_list)].copy()
+df_clm_filtered['Yield_bu_per_acre'] = df_clm_filtered['Production(BU)'] / (df_clm_filtered['Harvest_Area(km^2)']*247.105)
+df_clm_clear = df_clm_filtered[['State_Name', 'Year', 'Yield_bu_per_acre','Production(BU)','Harvest_Area(km^2)']]
+
+# --- Merge Datasets ---
+comparison = pd.merge(
+    usda_merged,
+    df_clm_clear,
+    left_on=['State', 'Year'],
+    right_on=['State_Name', 'Year'],
+    suffixes=('_usda', '_clm')
+)
+
+# --- 4. Calculate Anomalies (Detrend BOTH USDA and CLM5) ---
+def calculate_anomalies(group):
+    # Skip if not enough data points to calculate a trend
+    if len(group) > 2:
+        # Dynamically find the starting year for this specific state
+        base_year = group['Year'].min()
+        
+        # 1. Detrend USDA Yield using linear regression
+        slope_usda, _, _, _, _ = linregress(group['Year'], group['Yield_bu_per_acre_usda'])
+        # Use the dynamic base_year instead of hardcoded 1981
+        group['USDA_Detrended_Yield'] = group['Yield_bu_per_acre_usda'] - (slope_usda * (group['Year'] - base_year))
+        mean_detrended_usda = group['USDA_Detrended_Yield'].mean()
+        group['USDA_Yield_Anomaly'] = group['USDA_Detrended_Yield'] - mean_detrended_usda
+                
+        # 2. Detrend CLM5 Yield using linear regression
+        slope_clm, _, _, _, _ = linregress(group['Year'], group['Yield_bu_per_acre_clm'])
+        # Use the dynamic base_year instead of hardcoded 1981
+        group['CLM5_Detrended_Yield'] = group['Yield_bu_per_acre_clm'] - (slope_clm * (group['Year'] - base_year))
+        mean_detrended_clm = group['CLM5_Detrended_Yield'].mean()
+        group['CLM5_Yield_Anomaly'] = group['CLM5_Detrended_Yield'] - mean_detrended_clm
+    else:
+        group['USDA_Detrended_Yield'] = np.nan
+        group['USDA_Yield_Anomaly'] = np.nan
+        group['CLM5_Detrended_Yield'] = np.nan
+        group['CLM5_Yield_Anomaly'] = np.nan
+        
+    return group
+
+# Apply the anomaly calculation state by state
+comparison = comparison.groupby('State_Name').apply(calculate_anomalies).reset_index(drop=True)
+comparison = comparison.dropna(subset=['USDA_Yield_Anomaly', 'CLM5_Yield_Anomaly'])
+
+# --- Correlations & Plotting ---
+fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+
+# Define the major states
+states = ['IOWA', 'ILLINOIS','NEBRASKA', 'MINNESOTA','INDIANA','SOUTH DAKOTA','WISCONSIN','KANSAS','OHIO','MISSOURI', 'MICHIGAN', 'TEXAS']
+
+# Split the dataset into major states and other states
+comparison_major = comparison[comparison['State_Name'].isin(states)]
+comparison_other = comparison[~comparison['State_Name'].isin(states)]
+
+# Calculate Correlations
+corr_all, p_all = pearsonr(comparison['USDA_Yield_Anomaly'], comparison['CLM5_Yield_Anomaly'])
+corr_major, p_major = pearsonr(comparison_major['USDA_Yield_Anomaly'], comparison_major['CLM5_Yield_Anomaly'])
+
+plt.scatter(comparison['USDA_Yield_Anomaly'], comparison['CLM5_Yield_Anomaly'], 
+            color='blue', s=15, alpha=0.8)
+
+plt.axhline(0, color='black', linestyle='--', linewidth=0.8)
+plt.axvline(0, color='black', linestyle='--', linewidth=0.8)
+
+
+corr_text = f"Pearson r = {corr_all:.3f}\np-value = {p_all:.3f}"
+
+plt.text(
+    0.05, 0.95, corr_text,
+    transform=plt.gca().transAxes,
+    verticalalignment='top',
+    fontsize=10,
+    bbox=dict(boxstyle="round", facecolor="white", alpha=0.6)
+)
+
+ticks = np.arange(-70, 70, 20)
+
+ax.set_xticks(ticks)
+ax.set_yticks(ticks)
+
+
+plt.title('(i) Corn')
+plt.xlabel('USDA-NASS Yield Anomalies (bu/acre)', fontsize=12)
+plt.ylabel('CLM5 Yield Anomalies (bu/acre)', fontsize=12)
+plt.tick_params(axis='both', labelsize=12) 
+plt.tight_layout()
+
+plt.savefig('/path_to_data_dir/USDA_vs_CLM_corn_yield_anomaly_both_detrended.png', dpi=500, bbox_inches='tight')
+plt.show()
+
+
+############################################ plot j, m 
 import pandas as pd
 import numpy as np 
 import matplotlib.pyplot as plt
@@ -191,7 +326,7 @@ df2_corn = pd.read_csv(path + 'corn_production_loss_hist_cl100.csv')
 df3_corn = pd.read_csv(path + 'corn_price.csv')
 
 
-df1_corn['State'] = df1_corn['State'].str.upper()  # Convert to uppercase to match df2
+df1_corn['State'] = df1_corn['State'].str.upper()  # Convert to uppercase 
 df1_corn['payment_per_acreage'] = df1_corn['Payment Indemnity']/df1_corn['Payment Acreage']
 df2_corn = df2_corn.merge(df3_corn[['Year', price]], on='Year', how='left')
 
@@ -244,7 +379,7 @@ plt.text(
 
 plt.xticks(np.arange(0, 501, 100))  
 plt.yticks(np.arange(0, 501, 100))  
-plt.title('(c1) Corn')  # Added r to title
+plt.title('(j) Corn')
 plt.tight_layout()
 print(f"ubRMSE for Corn: {ub_rmse_corn:.4f}")
 

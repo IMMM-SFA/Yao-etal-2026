@@ -233,8 +233,8 @@ fig, axes = plt.subplots(1, 3, figsize=(19, 8.5))
 
 desired_order_ids   = [1, 2, 7, 8, 6, 5, 4, 0]
 desired_order_names = ['NE', 'SE', 'SW', 'NW', 'SGP', 'NGP', 'MW', 'CONUS']
-panel_labels = ['(a)', '(b)', '(c)']
-for idx, crop in enumerate(['corn', 'wheat', 'soybean']):
+panel_labels = ['(a)', '(b)']
+for idx, crop in enumerate(['corn', 'soybean']):
     ax = axes[idx]
 
     # Extract the 4 original (non-averaged) scaled contributions
@@ -283,8 +283,6 @@ for idx, crop in enumerate(['corn', 'wheat', 'soybean']):
     # Apply exclusions (set both mean and error to NaN)
     if crop in ['corn', 'soybean']:
         exclude = [7, 8]   # SW, NW
-    elif crop == 'wheat':
-        exclude = [1]      # NE
     else:
         exclude = []
     df_plot.loc[df_plot['nca_id'].isin(exclude),

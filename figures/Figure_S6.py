@@ -18,11 +18,6 @@ all_crop_results = {}
 
 def plot_drought_duration_only(duration_dfs, region_abbrev, region_order,
                                output_file, add_legend=False):
-    """
-    Plots only the Drought Duration panel for all three crops in one figure (1 row × 3 columns).
-    Reuses as much logic as possible from the original function, but focuses on the duration metric.
-    Excludes the same regions as in your original calls.
-    """
     crops = ['corn', 'wheat', 'soybean']
     exclude_regions_list = [
         ['NW', 'SW'],  # for corn
@@ -33,7 +28,7 @@ def plot_drought_duration_only(duration_dfs, region_abbrev, region_order,
 
     fig, axes = plt.subplots(1, 3, figsize=(20, 5), sharey=True)  # Share y-axis since all are duration
 
-    title = 'Drought Duration (% of Growing Season)'
+    # title = 'Drought Duration (% of Growing Season)'
     value_col = 'drought_duration(% of growing season)'
     scenario_groups = ['hist', 'RCP-only', 'RCP+SSP']
     colors = {'hist': 'darkgrey', 'RCP-only': 'green', 'RCP+SSP': 'orange'}

@@ -147,9 +147,6 @@ plot_drought_area_intensity_compact('corn', area_dfs, intensity_dfs, region_abbr
                                     exclude_regions=['NW', 'SW'],
                                     output_file='corn.png')
 
-plot_drought_area_intensity_compact('wheat', area_dfs, intensity_dfs, region_abbrev, region_order,
-                                    exclude_regions=['NE'],
-                                    output_file='wheat.png')
 
 plot_drought_area_intensity_compact('soybean', area_dfs, intensity_dfs, region_abbrev, region_order,
                                     exclude_regions=['NW', 'SW'],

@@ -1,5 +1,4 @@
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-# 1 'Northeast', 2 'Southeast', 4 'Midwest', 5'N. Great Plains', 6'S. Great Plains', 8'Northwest', 7'Southwest'
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -143,7 +142,7 @@ ax_bottom.set_xlabel('atm45_ssp3 vs atm85_ssp5 in Financial Loss (%)', fontsize=
 # ax_bottom.set_ylabel('Cumulative Probability', fontsize=14, labelpad=10)
 # Final plot settings
 fig.text(-0.001, 0.5, 'Cumulative Probability', rotation=90, ha='center', va='center', fontsize=16)
-fig.text(0.23, 0.93, '(a1) Corn', rotation=0, ha='center', va='center', fontsize=14)
+fig.text(0.23, 0.93, '(a) Corn', rotation=0, ha='center', va='center', fontsize=14)
 
 ax_top.set_ylabel('', fontsize=14)  # No y-label for top axis
 ax_top.tick_params(axis='x', which='both', bottom=False, labelbottom=False)  # Hide x-ticks on top axis
@@ -158,4 +157,3 @@ ax_bottom.axvline(x=0, color='gray', linestyle='--', linewidth=2, alpha=0.8)
 # ax_bottom.legend(fontsize=12, loc='center right')
 fig.tight_layout(pad=0.5)
 plt.savefig(f'{path}/financial_loss_345diff585_corn_cooler.png', dpi=300, bbox_inches='tight')
-print ('done')
