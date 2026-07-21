@@ -1,0 +1,22 @@
+region_id,region_name,crop,scenario,uncertainty_score
+1,Northeast,wheat,NF,
+2,Southeast,wheat,NF,0.057359153
+4,Midwest,wheat,NF,0.046237239
+5,N. Great Plains,wheat,NF,0.0541198
+6,S. Great Plains,wheat,NF,0.043976028
+8,Northwest,wheat,NF,0.016486808
+7,Southwest,wheat,NF,0.115767725
+1,Northeast,corn,NF,0.177232855
+2,Southeast,corn,NF,0.165709134
+4,Midwest,corn,NF,0.294486318
+5,N. Great Plains,corn,NF,0.063162884
+6,S. Great Plains,corn,NF,0.077441121
+8,Northwest,corn,NF,
+7,Southwest,corn,NF,
+1,Northeast,soybean,NF,0.16653239
+2,Southeast,soybean,NF,0.102472945
+4,Midwest,soybean,NF,0.137763718
+5,N. Great Plains,soybean,NF,0.071839261
+6,S. Great Plains,soybean,NF,0.084541128
+8,Northwest,soybean,NF,
+7,Southwest,soybean,NF,
